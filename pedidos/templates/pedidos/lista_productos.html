@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Botón para ir al carrito -->
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'ver_carrito' %}" class="btn btn-success fw-semibold">
+            🛒 Ver carrito 
+            {% if total_items_carrito > 0 %}
+                <span class="badge bg-light text-dark ms-1">{{ total_items_carrito }}</span>
+            {% endif %}
+        </a>
+    </div>
+
+    <h1 class="mb-4 text-primary">🛍️ Catálogo de Productos</h1>
+
+    <!-- Categorías -->
+    <div class="mb-4">
+        <h5 class="mb-3">📂 Categorías:</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <a href="{% url 'lista_productos' %}" class="text-decoration-none">📌 Todos</a>
+            </li>
+            {% for categoria in categorias %}
+                <li class="list-group-item">
+                    <a href="#" class="toggle-subcategorias d-flex justify-content-between align-items-center text-decoration-none" data-target="subcats-{{ categoria.id }}">
+                        {{ categoria.nombre }}
+                        <span class="flecha" id="flecha-{{ categoria.id }}">⬇️</span>
+                    </a>
+
+                    {% if categoria.subcategorias.all %}
+                        <ul id="subcats-{{ categoria.id }}" class="list-group ms-3 mt-2 oculto subcategorias">
+                            {% for sub in categoria.subcategorias.all %}
+                                <li class="list-group-item">
+                                    ↳ <a href="{% url 'lista_productos_por_categoria' sub.id %}" class="text-decoration-none">{{ sub.nombre }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Productos -->
+    <div class="productos">
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for producto in productos %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 product-card">
+                        {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" class="card-img-top p-2" style="object-fit: contain; height: 180px;" alt="{{ producto.nombre }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title text-dark">{{ producto.nombre }}</h6>
+                            <p class="precio-producto text-success fw-bold">$ {{ producto.precio }}</p>
+                            <p class="stock text-muted small">Stock: {{ producto.stock }}</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 text-end">
+                            <a href="{% url 'agregar_al_carrito' producto.id %}" class="btn btn-warning btn-sm fw-semibold">🛒 Agregar</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No hay productos disponibles en esta categoría.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const toggles = document.querySelectorAll('.toggle-subcategorias');
+
+    toggles.forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const targetId = item.getAttribute('data-target');
+            const subcategoriaLista = document.getElementById(targetId);
+            const flecha = document.getElementById('flecha-' + targetId.split('-')[1]);
+
+            if (subcategoriaLista) {
+                const isHidden = subcategoriaLista.classList.contains('oculto');
+
+                if (isHidden) {
+                    subcategoriaLista.classList.remove('oculto');
+                    flecha.textContent = "⬆️";
+                } else {
+                    subcategoriaLista.classList.add('oculto');
+                    flecha.textContent = "⬇️";
+                }
+            }
+        });
+    })
+});
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Resumen de tu compra</h2>
+
+<table border="1">
+    <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio Unitario</th>
+        <th>Subtotal</th>
+    </tr>
+    {% for item in compra.items.all %}
+    <tr>
+        <td>{{ item.producto.nombre }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td>${{ item.producto.precio }}</td>
+        <td>${{ item.subtotal }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Total: ${{ compra.total }}</h3>
+<p>Método de pago: {{ compra.metodo_pago }}</p>
+
+<a href="{% url 'confirmar_pago' compra.id %}" class="btn btn-success">Confirmar y Pagar</a>
+{% endblock %}

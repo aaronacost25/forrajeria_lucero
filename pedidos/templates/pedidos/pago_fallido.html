@@ -1,0 +1,16 @@
+<!-- templates/pago_exitoso.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pago Exitoso</title>
+</head>
+<body>
+    <h1>¡Gracias por tu compra, {{ compra.cliente_nombre }}!</h1>
+    <p>El pago se ha procesado correctamente.</p>
+    <p>Producto: {{ compra.producto }}</p>
+    <p>Total: ${{ compra.precio }}</p>
+
+    <a href="{% url 'generar_comprobante' compra.id %}">Descargar comprobante en PDF</a>
+</body>
+</html>
+    

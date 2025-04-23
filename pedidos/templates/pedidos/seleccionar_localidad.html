@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Seleccioná tu localidad</h2>
+    <form method="post">
+        {% csrf_token %}
+        <select name="localidad" class="form-control mb-3" required>
+            <option value="">Seleccioná una opción</option>
+            <option value="Mayu Sumaj">Mayu Sumaj</option>
+            <option value="San Antonio">San Antonio</option>
+            <option value="Icho Cruz">Icho Cruz</option>
+            <option value="Otro">Otro</option>
+        </select>
+        <button type="submit" class="btn btn-success">Continuar</button>
+    </form>
+</div>
+{% endblock %}

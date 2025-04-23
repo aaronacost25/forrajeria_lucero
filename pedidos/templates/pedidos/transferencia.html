@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Pago por Transferencia</h2>
+
+{% for item in carrito %}
+    <p><strong>Producto:</strong> {{ item.producto_obj.nombre }}</p>
+    <p><strong>Cantidad:</strong> {{ item.cantidad }}</p>
+    <p><strong>Precio:</strong> ${{ item.precio }}</p>
+    <p><strong>Subtotal:</strong> ${{ item.precio|floatformat:2 }}</p>
+    <hr>
+{% endfor %}
+
+<p><strong>Cliente:</strong> {{ cliente_nombre }}</p>
+
+<p><strong>Total:</strong> ${{ carrito.obtener_total }}</p>
+
+<h3>Datos para la transferencia:</h3>
+<ul>
+    <li><strong>CBU:</strong> 1234567890123456789012</li>
+    <li><strong>Alias:</strong> mipago.empresa</li>
+</ul>
+
+<p>
+    Una vez realizada la transferencia, por favor enviá el comprobante al WhatsApp:
+    <a href="https://wa.me/5493541620247?text=Hola%2C+te+env%C3%ADo+el+comprobante+de+mi+compra+por+transferencia" target="_blank">
+        3541-620247
+      </a>
+      
+</p>
+
+{% endblock %}

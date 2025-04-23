@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>¡Pago Exitoso! 🎉</h2>
+<p>Gracias por tu compra, {{ compra.cliente_nombre }}.</p>
+<p>Producto: {{ compra.producto }}</p>
+<p>Total pagado: ${{ compra.precio }}</p>
+<p>Tu pago con tarjeta fue procesado correctamente.</p>
+{% endblock %}

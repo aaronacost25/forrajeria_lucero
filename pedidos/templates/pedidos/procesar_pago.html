@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Procesar Pago</h2>
+
+<p><strong>Producto:</strong> {{ compra.producto }}</p>
+<p><strong>Cantidad:</strong> {{ compra.cantidad }}</p>
+<p><strong>Precio:</strong> ${{ compra.precio }}</p>
+<p><strong>Total:</strong> ${{ compra.precio|floatformat:2|add:""|floatformat:2|floatformat:2 }}</p>
+<p><strong>Cliente:</strong> {{ compra.cliente_nombre }}</p>
+<p><strong>Método de pago:</strong> {{ compra.metodo_pago }}</p>
+
+<p>Gracias por tu compra. Aquí iría el procesamiento del pago con tarjeta o efectivo.</p>
+{% endblock %}

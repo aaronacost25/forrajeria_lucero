@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary mb-3">
+        ← Volver al menú
+    </a>
+    <h2>Carrito de Compras</h2>
+
+<div class="container mt-4">
+    
+    {% if carrito.carrito %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="localidad">Elegí tu localidad:</label>
+            <select name="localidad" id="localidad" onchange="this.form.submit()">
+                <option value="">Seleccioná una opción</option>
+                <option value="Mayu Sumaj" {% if localidad == 'Mayu Sumaj' %}selected{% endif %}>Mayu Sumaj</option>
+                <option value="San Antonio" {% if localidad == 'San Antonio' %}selected{% endif %}>San Antonio</option>
+                <option value="Icho Cruz" {% if localidad == 'Icho Cruz' %}selected{% endif %}>Icho Cruz</option>
+                <option value="Otro" {% if localidad == 'Otro' %}selected{% endif %}>Otro</option>
+            </select>
+        </form>
+
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Imagen</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in carrito %}
+                <tr>
+                    <td>{{ item.nombre }}</td>
+                    <td>
+                        {% if item.imagen %}
+                            <img src="{{ item.imagen }}" width="60">
+                        {% endif %}
+                    </td>
+                    <td>${{ item.precio }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ item.subtotal }}</td>
+                    <td>
+                        {% if item.producto %}
+                            <form method="post" action="{% url 'agregar_al_carrito' item.producto.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">+</button>
+                            </form>
+                            <form method="post" action="{% url 'restar_producto' item.producto.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm">-</button>
+                            </form>
+                            <form method="post" action="{% url 'eliminar_producto' item.producto.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Total productos: ${{ total }}</h4>
+        <h4>Costo de envío: ${{ envio }}</h4>
+        <h3><strong>Total final: ${{ total_final }}</strong></h3>
+
+        <div class="mt-3">
+            <a href="{% url 'limpiar_carrito' %}" class="btn btn-danger">Vaciar carrito</a>
+            <a href="{% url 'finalizar_compra' %}" class="btn btn-primary">Finalizar compra</a>
+        </div>
+    {% else %}
+        <p>No hay productos en el carrito.</p>
+    {% endif %}
+</div>
+{% endblock %}
+    
