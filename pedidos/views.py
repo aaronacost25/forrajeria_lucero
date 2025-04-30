@@ -199,6 +199,13 @@ from django.urls import reverse
 import mercadopago
 from pedidos.models import Compra
 
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.conf import settings
+from django.urls import reverse
+import mercadopago
+from pedidos.models import Compra
+
 def pagar_mercadopago(request, compra_id):
     compra = get_object_or_404(Compra, id=compra_id)
 
@@ -229,23 +236,26 @@ def pagar_mercadopago(request, compra_id):
             "currency_id": "ARS",
         })
 
+    # Usar settings.DOMAIN para armar las URLs de retorno
+    base_url = settings.DOMAIN.rstrip("/")  # elimina la barra final si hay
+
     preference_data = {
         "items": items,
         "payer": {
             "name": compra.cliente_nombre,
         },
         "back_urls": {
-            "success": request.build_absolute_uri(reverse('compra_exitosa', args=[compra.id])),
-            "failure": request.build_absolute_uri(reverse('compra_fallida', args=[compra.id])),
-            "pending": request.build_absolute_uri(reverse('compra_pendiente', args=[compra.id]))
+            "success": f"{base_url}{reverse('compra_exitosa', args=[compra.id])}",
+            "failure": f"{base_url}{reverse('compra_fallida', args=[compra.id])}",
+            "pending": f"{base_url}{reverse('compra_pendiente', args=[compra.id])}",
         },
-       # "auto_return": "approved",
+        "auto_return": "approved",
         "external_reference": str(compra.id)
     }
+
     print("➡️ Enviando a Mercado Pago:")
     import pprint
     pprint.pprint(preference_data)
-
 
     preference_response = sdk.preference().create(preference_data)
     preference = preference_response.get("response", {})
@@ -255,6 +265,7 @@ def pagar_mercadopago(request, compra_id):
     else:
         print("❌ ERROR al generar preferencia de pago:")
         print(preference_response)
+        print("🌐 Dominio activo:", base_url)
         return HttpResponse("Hubo un problema al generar el enlace de pago. Por favor, intentá nuevamente.")
 
 

@@ -106,3 +106,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Tailwind
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ['127.0.0.1']
+DOMAIN = config("DOMAIN", default="http://127.0.0.1:8000")
