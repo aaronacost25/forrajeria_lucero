@@ -192,6 +192,13 @@ def procesar_pago(request, compra_id):
 
     return render(request, 'pedidos/tarjeta.html', {'compra': compra})
 
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.conf import settings
+from django.urls import reverse
+import mercadopago
+from pedidos.models import Compra
+
 def pagar_mercadopago(request, compra_id):
     compra = get_object_or_404(Compra, id=compra_id)
 
@@ -228,18 +235,28 @@ def pagar_mercadopago(request, compra_id):
             "name": compra.cliente_nombre,
         },
         "back_urls": {
-            "success": request.build_absolute_uri(f"/compra-exitosa/{compra.id}/"),
-            "failure": request.build_absolute_uri(f"/compra-fallida/{compra.id}/"),
-            "pending": request.build_absolute_uri(f"/compra-pendiente/{compra.id}/")
+            "success": request.build_absolute_uri(reverse('compra_exitosa', args=[compra.id])),
+            "failure": request.build_absolute_uri(reverse('compra_fallida', args=[compra.id])),
+            "pending": request.build_absolute_uri(reverse('compra_pendiente', args=[compra.id]))
         },
-        "auto_return": "approved",
+       # "auto_return": "approved",
         "external_reference": str(compra.id)
     }
+    print("➡️ Enviando a Mercado Pago:")
+    import pprint
+    pprint.pprint(preference_data)
+
 
     preference_response = sdk.preference().create(preference_data)
-    preference = preference_response["response"]
+    preference = preference_response.get("response", {})
 
-    return redirect(preference["init_point"])
+    if "init_point" in preference:
+        return redirect(preference["init_point"])
+    else:
+        print("❌ ERROR al generar preferencia de pago:")
+        print(preference_response)
+        return HttpResponse("Hubo un problema al generar el enlace de pago. Por favor, intentá nuevamente.")
+
 
 # Vista para generar comprobante PDF
 def generar_comprobante(request, compra_id):
