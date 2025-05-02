@@ -207,69 +207,71 @@ import mercadopago
 from pedidos.models import Compra
 
 def pagar_mercadopago(request, compra_id):
-    compra = get_object_or_404(Compra, id=compra_id)
+    try:
+        compra = get_object_or_404(Compra, id=compra_id)
 
-    sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
+        print("🔐 TOKEN USADO:", settings.MERCADOPAGO_ACCESS_TOKEN)
 
-    envio = 0
-    localidades_envio_gratis = ["Mayu Sumaj", "San Antonio", "Icho Cruz"]
-    if compra.localidad in localidades_envio_gratis:
-        if compra.precio < 50000:
-            envio = 3500
-    else:
-        envio = 3000
+        sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
-    items = [
-        {
-            "title": str(compra.producto),
-            "quantity": int(compra.cantidad),
-            "unit_price": float(compra.precio),
-            "currency_id": "ARS",
+        envio = 0
+        localidades_envio_gratis = ["Mayu Sumaj", "San Antonio", "Icho Cruz"]
+        if compra.localidad in localidades_envio_gratis:
+            if compra.precio < 50000:
+                envio = 3500
+        else:
+            envio = 3000
+
+        items = [
+            {
+                "title": str(compra.producto),
+                "quantity": int(compra.cantidad),
+                "unit_price": float(compra.precio),
+                "currency_id": "ARS",
+            }
+        ]
+
+        if envio > 0:
+            items.append({
+                "title": "Costo de envío",
+                "quantity": 1,
+                "unit_price": envio,
+                "currency_id": "ARS",
+            })
+
+        base_url = settings.DOMAIN.rstrip("/")
+
+        preference_data = {
+            "items": items,
+            "payer": {"name": compra.cliente_nombre},
+            "back_urls": {
+                "success": f"{base_url}{reverse('compra_exitosa', args=[compra.id])}",
+                "failure": f"{base_url}{reverse('compra_fallida', args=[compra.id])}",
+                "pending": f"{base_url}{reverse('compra_pendiente', args=[compra.id])}",
+            },
+            "auto_return": "approved",
+            "external_reference": str(compra.id)
         }
-    ]
 
-    if envio > 0:
-        items.append({
-            "title": "Costo de envío",
-            "quantity": 1,
-            "unit_price": envio,
-            "currency_id": "ARS",
-        })
+        print("📦 Enviando preferencia:")
+        import pprint
+        pprint.pprint(preference_data)
 
-    # Usar settings.DOMAIN para armar las URLs de retorno
-    base_url = settings.DOMAIN.rstrip("/")  # elimina la barra final si hay
+        preference_response = sdk.preference().create(preference_data)
+        print("📬 Respuesta de MercadoPago:", preference_response)
 
-    preference_data = {
-        "items": items,
-        "payer": {
-            "name": compra.cliente_nombre,
-        },
-        "back_urls": {
-            "success": f"{base_url}{reverse('compra_exitosa', args=[compra.id])}",
-            "failure": f"{base_url}{reverse('compra_fallida', args=[compra.id])}",
-            "pending": f"{base_url}{reverse('compra_pendiente', args=[compra.id])}",
-        },
-        "auto_return": "approved",
-        "external_reference": str(compra.id)
-    }
+        preference = preference_response.get("response", {})
 
-    print("➡️ Enviando a Mercado Pago:")
-    import pprint
-    pprint.pprint(preference_data)
+        if "init_point" in preference:
+            return redirect(preference["init_point"])
+        else:
+            print("❌ ERROR al generar preferencia:", preference_response)
+            return HttpResponse("No se pudo generar la preferencia.")
 
-    preference_response = sdk.preference().create(preference_data)
-    preference = preference_response.get("response", {})
-
-    if "init_point" in preference:
-        return redirect(preference["init_point"])
-    else:
-        print("❌ ERROR al generar preferencia de pago:")
-        print(preference_response)
-        print("🌐 Dominio activo:", base_url)
-        print("🔐 TOKEN USADO:", settings.MERCADO_PAGO_ACCESS_TOKEN)
-
-        return HttpResponse("Hubo un problema al generar el enlace de pago. Por favor, intentá nuevamente.")
-
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponse(f"⚠️ Error interno del servidor: {str(e)}", status=500)
 
 # Vista para generar comprobante PDF
 def generar_comprobante(request, compra_id):
