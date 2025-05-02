@@ -210,9 +210,9 @@ def pagar_mercadopago(request, compra_id):
     try:
         compra = get_object_or_404(Compra, id=compra_id)
 
-        print("🔐 TOKEN USADO:", settings.MERCADOPAGO_ACCESS_TOKEN)
+        print("🔐 TOKEN USADO:", settings.MERCADO_PAGO_ACCESS_TOKEN)
 
-        sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
+        sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
 
         envio = 0
         localidades_envio_gratis = ["Mayu Sumaj", "San Antonio", "Icho Cruz"]
