@@ -49,7 +49,7 @@ ROOT_URLCONF = 'tienda.urls'
 WSGI_APPLICATION = 'tienda.wsgi.application'
 
 # Mercado Pago desde variable de entorno
-MERCADO_PAGO_ACCESS_TOKEN = config('MERCADO_PAGO_ACCESS_TOKEN', default='')
+MERCADO_PAGO_ACCESS_TOKEN = config('MERCADOPAGO_ACCESS_TOKEN', default='')
 
 # Templates
 TEMPLATES = [

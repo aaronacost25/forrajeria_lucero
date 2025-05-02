@@ -209,7 +209,7 @@ from pedidos.models import Compra
 def pagar_mercadopago(request, compra_id):
     compra = get_object_or_404(Compra, id=compra_id)
 
-    sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
+    sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
     envio = 0
     localidades_envio_gratis = ["Mayu Sumaj", "San Antonio", "Icho Cruz"]
@@ -266,6 +266,8 @@ def pagar_mercadopago(request, compra_id):
         print("❌ ERROR al generar preferencia de pago:")
         print(preference_response)
         print("🌐 Dominio activo:", base_url)
+        print("🔐 TOKEN USADO:", settings.MERCADO_PAGO_ACCESS_TOKEN)
+
         return HttpResponse("Hubo un problema al generar el enlace de pago. Por favor, intentá nuevamente.")
 
 
